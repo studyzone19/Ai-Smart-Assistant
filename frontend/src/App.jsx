@@ -1,0 +1,72 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext.jsx";
+import Layout from "./components/Layout.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Chat from "./pages/Chat.jsx";
+import Study from "./pages/Study.jsx";
+import Code from "./pages/Code.jsx";
+import Documents from "./pages/Documents.jsx";
+import Search from "./pages/Search.jsx";
+import Resume from "./pages/Resume.jsx";
+import Reports from "./pages/Reports.jsx";
+import Memory from "./pages/Memory.jsx";
+import Settings from "./pages/Settings.jsx";
+import Admin from "./pages/Admin.jsx";
+
+function Protected({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-slate-400">
+        Loading AI Smart Assistant...
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+}
+
+function AdminOnly({ children }) {
+  const { user } = useAuth();
+  if (user?.role !== "admin") return <Navigate to="/" replace />;
+  return children;
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/"
+        element={
+          <Protected>
+            <Layout />
+          </Protected>
+        }
+      >
+        <Route index element={<Navigate to="/chat" replace />} />
+        <Route path="chat" element={<Chat />} />
+        <Route path="chat/:chatId" element={<Chat />} />
+        <Route path="study" element={<Study />} />
+        <Route path="code" element={<Code />} />
+        <Route path="documents" element={<Documents />} />
+        <Route path="search" element={<Search />} />
+        <Route path="resume" element={<Resume />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="memory" element={<Memory />} />
+        <Route path="settings" element={<Settings />} />
+        <Route
+          path="admin"
+          element={
+            <AdminOnly>
+              <Admin />
+            </AdminOnly>
+          }
+        />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}

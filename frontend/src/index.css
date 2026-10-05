@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  background: #0b0b14;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(139,92,246,0.16), transparent 40%),
+    radial-gradient(circle at 85% 0%, rgba(6,182,212,0.12), transparent 40%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a55; }
+
+.glass {
+  background: rgba(19, 19, 31, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.glass-dropdown {
+  background: rgba(15, 15, 26, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* AI Markdown rendering */
+.prose-ai {
+  line-height: 1.65;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.prose-ai p { margin-bottom: 0.75rem; }
+.prose-ai ul, .prose-ai ol { margin: 0.5rem 0 0.75rem 1.25rem; }
+.prose-ai li { margin-bottom: 0.25rem; }
+.prose-ai h1, .prose-ai h2, .prose-ai h3 { font-weight: 600; margin: 1rem 0 0.5rem; color: #e9e9f5; }
+.prose-ai code { background: rgba(255,255,255,0.08); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.875em; word-break: break-all; }
+.prose-ai pre { background: #0d0d16; border: 1px solid #23233a; border-radius: 10px; padding: 0.9rem; overflow-x: auto; margin: 0.6rem 0; max-width: 100%; }
+.prose-ai pre code { background: transparent; padding: 0; word-break: normal; }
+.prose-ai img { max-width: 100%; height: auto; border-radius: 8px; }
+.prose-ai table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; margin: 0.8rem 0; }
+.prose-ai th, .prose-ai td { border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; font-size: 13px; }
+.prose-ai th { background: rgba(255,255,255,0.05); }
+
+/* Safe padding for bottom nav */
+.safe-pb-mobile {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Print to PDF Styles */
+@media print {
+  aside, header, nav, button, input, textarea, .no-print {
+    display: none !important;
+  }
+  body, #root, main {
+    background: #ffffff !important;
+    color: #111111 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .prose-ai {
+    color: #111111 !important;
+  }
+  .prose-ai h1, .prose-ai h2, .prose-ai h3 {
+    color: #000000 !important;
+  }
+  .prose-ai pre {
+    background: #f4f4f5 !important;
+    border: 1px solid #e4e4e7 !important;
+    color: #18181b !important;
+  }
+}
