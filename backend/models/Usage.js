@@ -7,7 +7,7 @@ const usageSchema = new mongoose.Schema(
       type: String,
       enum: [
         "chat", "study", "coding", "document_upload", "document_qa",
-        "web_search", "resume", "report", "login", "register",
+        "web_search", "resume", "report", "image_generation", "login", "register",
       ],
       required: true,
     },

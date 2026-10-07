@@ -1,14 +1,19 @@
 const Report = require("../models/Report");
-const Usage = require("../models/Usage");
+const { recordUsage } = require("../services/usageService");
 const aiService = require("../services/aiService");
 
 // POST /api/reports/generate  { topic, type, notes }
 exports.generateReport = async (req, res, next) => {
   try {
     const { topic, type, notes } = req.body;
-    if (!topic) return res.status(400).json({ success: false, message: "topic is required" });
+    const reportTypes = new Set(["project", "college", "technical", "business", "research"]);
+    if (typeof topic !== "string" || !topic.trim() || topic.length > 300
+      || (notes !== undefined && (typeof notes !== "string" || notes.length > 10000))
+      || !reportTypes.has(type || "project")) {
+      return res.status(400).json({ success: false, message: "Provide a topic up to 300 characters, valid report type, and notes up to 10,000 characters." });
+    }
 
-    const content = await aiService.generateReport({ topic, type: type || "project", notes });
+    const content = await aiService.generateReport({ topic, type: type || "project", notes }, req.user.preferredLanguage);
 
     const report = await Report.create({
       user: req.user._id,
@@ -17,7 +22,7 @@ exports.generateReport = async (req, res, next) => {
       content,
     });
 
-    await Usage.create({ user: req.user._id, action: "report", meta: { topic, type } });
+    await recordUsage(req.user._id, "report", { topic, type });
     res.status(201).json({ success: true, report });
   } catch (err) {
     next(err);

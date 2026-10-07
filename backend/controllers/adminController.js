@@ -54,6 +54,8 @@ exports.listUsers = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   try {
     const { role, isActive } = req.body;
+    if (role !== undefined && !["user", "admin"].includes(role)) return res.status(400).json({ success: false, message: "Role must be user or admin." });
+    if (isActive !== undefined && typeof isActive !== "boolean") return res.status(400).json({ success: false, message: "Account status must be true or false." });
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     if (role !== undefined) user.role = role;

@@ -45,6 +45,7 @@ export default function Search() {
         <SearchIcon size={16} className="text-slate-500 shrink-0" />
         <input
           value={query}
+          maxLength={500}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for recent news, facts, tutorials, or data..."
           className="flex-1 bg-transparent outline-none text-xs sm:text-sm py-1 text-white placeholder-slate-500"

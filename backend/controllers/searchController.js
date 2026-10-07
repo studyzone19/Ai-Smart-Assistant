@@ -1,4 +1,4 @@
-const Usage = require("../models/Usage");
+const { recordUsage } = require("../services/usageService");
 const { webSearch } = require("../services/searchService");
 const aiService = require("../services/aiService");
 
@@ -6,11 +6,14 @@ const aiService = require("../services/aiService");
 exports.search = async (req, res, next) => {
   try {
     const { query } = req.body;
-    if (!query || !query.trim()) {
+    if (typeof query !== "string" || !query.trim() || query.length > 500) {
       return res.status(400).json({ success: false, message: "query is required" });
     }
 
     const results = await webSearch(query, 5);
+    if (!results.length) {
+      return res.status(502).json({ success: false, message: "The search provider did not return any usable results. Try a different query." });
+    }
 
     const context = results
       .map((r, i) => `[${i + 1}] ${r.title}\n${r.snippet}\nSource: ${r.url}`)
@@ -29,7 +32,7 @@ exports.search = async (req, res, next) => {
       }
     );
 
-    await Usage.create({ user: req.user._id, action: "web_search", meta: { query } });
+    await recordUsage(req.user._id, "web_search", { query });
     res.json({ success: true, answer, sources: results });
   } catch (err) {
     next(err);

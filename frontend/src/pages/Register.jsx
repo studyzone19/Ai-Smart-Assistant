@@ -27,8 +27,10 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm glass rounded-3xl p-6 sm:p-8 border border-border shadow-2xl">
+    <div className="relative min-h-[100dvh] flex items-center justify-center px-4 py-6 sm:py-8 overflow-x-hidden overflow-y-auto">
+      <div className="pointer-events-none absolute -top-32 -left-28 h-80 w-80 rounded-full bg-teal-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="relative w-full max-w-md glass rounded-[28px] p-6 sm:p-10 border border-white/10 shadow-2xl">
         <div className="flex items-center gap-2.5 mb-6">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-accent2 flex items-center justify-center shadow-md">
             <Sparkles size={20} className="text-white" />
@@ -39,8 +41,8 @@ export default function Register() {
           </div>
         </div>
 
-        <h1 className="text-xl font-bold text-white mb-1">Create an account</h1>
-        <p className="text-xs text-slate-400 mb-5">Get started with AI chat, study, code and tools.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Create your account</h1>
+        <p className="text-sm text-slate-400 mb-6">Get started with AI chat, study, code and tools.</p>
 
         {error && (
           <div className="mb-4 text-xs sm:text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl px-3.5 py-2.5">
@@ -48,54 +50,57 @@ export default function Register() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-slate-300 mb-1 block">Full Name</label>
+            <label className="text-xs font-medium text-slate-300 mb-1.5 block">Full name</label>
             <input
               required
+              maxLength={80}
               placeholder="Ram Prajapati"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-surface2 border border-border focus:border-accent rounded-xl px-3.5 py-2.5 text-sm outline-none text-white placeholder-slate-500 transition-colors"
+              className="w-full bg-slate-950/40 border border-slate-700/80 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/10 rounded-xl px-3.5 py-3 text-sm outline-none text-white placeholder-slate-500 transition-all"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-slate-300 mb-1 block">Email</label>
+            <label className="text-xs font-medium text-slate-300 mb-1.5 block">Email address</label>
             <input
               type="email"
               required
+              maxLength={254}
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-surface2 border border-border focus:border-accent rounded-xl px-3.5 py-2.5 text-sm outline-none text-white placeholder-slate-500 transition-colors"
+              className="w-full bg-slate-950/40 border border-slate-700/80 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/10 rounded-xl px-3.5 py-3 text-sm outline-none text-white placeholder-slate-500 transition-all"
             />
           </div>
 
           <div>
-            <label className="text-xs font-medium text-slate-300 mb-1 block">Password</label>
+            <label className="text-xs font-medium text-slate-300 mb-1.5 block">Password</label>
             <input
               type="password"
               required
               minLength={6}
+              maxLength={72}
               placeholder="Min 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-surface2 border border-border focus:border-accent rounded-xl px-3.5 py-2.5 text-sm outline-none text-white placeholder-slate-500 transition-colors"
+              className="w-full bg-slate-950/40 border border-slate-700/80 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/10 rounded-xl px-3.5 py-3 text-sm outline-none text-white placeholder-slate-500 transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-accent to-accent2 hover:opacity-95 text-white rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 shadow-md active:scale-98 transition-all mt-2"
+            className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:brightness-110 text-white rounded-xl py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg shadow-teal-950/30 active:scale-[0.99] transition-all mt-2"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <span>Create Account</span>}
             {!loading && <ArrowRight size={16} />}
           </button>
         </form>
 
-        <p className="text-xs text-slate-400 mt-6 text-center">
+        <p className="text-sm text-slate-400 mt-7 text-center">
           Already have an account?{" "}
           <Link to="/login" className="text-accent hover:underline font-medium">
             Sign in

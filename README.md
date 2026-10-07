@@ -1,8 +1,8 @@
 # AI Smart Assistant
 
-**Ask. Learn. Code. Create. Search. Analyze.**
+**Ask. Learn. Code. Create. Analyze.**
 
-A full-stack, production-ready AI assistant platform built on the MERN stack. Built as a complete semester/portfolio project — AI chat, voice input/output, PDF & image understanding, web search, user-controlled AI memory, study mode, coding mode, resume builder, report generator, Hindi/English/Hinglish support, PWA/mobile support, and an admin dashboard.
+A full-stack AI assistant portfolio project built on the MERN stack. It includes AI chat, voice input/output, document and image understanding, optional live web search, user-controlled AI memory, study and coding modes, resume and report tools, Hindi/English/Hinglish responses, PWA/mobile support, and an admin dashboard.
 
 ---
 
@@ -13,8 +13,8 @@ A full-stack, production-ready AI assistant platform built on the MERN stack. Bu
 | Frontend | React 18, Vite, Tailwind CSS, React Router, Axios, Lucide React, React Markdown |
 | Backend | Node.js, Express.js, Mongoose, JWT, bcryptjs, Multer, Helmet, express-rate-limit |
 | Database | MongoDB (local or Atlas) |
-| AI | Anthropic Claude API (swappable for any OpenAI-compatible endpoint in `backend/services/aiService.js`) |
-| Search | Configurable web-search API (Tavily by default, swappable in `backend/services/searchService.js`) |
+| AI | Google Gemini Developer API (`@google/genai`) |
+| Search | Tavily-compatible web-search API (optional; requires a valid provider key) |
 | Voice | Browser Web Speech API (SpeechRecognition + SpeechSynthesis) — no extra service needed |
 | Deployment | Vercel (frontend) + Render (backend) + MongoDB Atlas |
 
@@ -43,9 +43,9 @@ ai-smart-assistant/
 ## 3. Local Setup
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 20+ for the backend (Node.js 18+ for the frontend)
 - A MongoDB connection string (local `mongod` or a free MongoDB Atlas cluster)
-- An Anthropic API key (console.anthropic.com) — or any OpenAI-compatible key, with a small edit to `aiService.js`
+- A Google Gemini API key from Google AI Studio
 - (Optional) A web-search API key — e.g. Tavily — for the Search module
 
 ### Backend
@@ -86,13 +86,15 @@ db.users.updateOne({ email: "you@example.com" }, { $set: { role: "admin" } })
 PORT=5000
 NODE_ENV=development
 MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/ai-smart-assistant
-JWT_SECRET=replace_with_a_long_random_secret
+JWT_SECRET=replace_with_a_random_secret_of_at_least_32_characters
 JWT_EXPIRES_IN=7d
-AI_API_KEY=your_anthropic_api_key
-AI_MODEL=claude-sonnet-4-5
+AI_API_KEY=your_google_ai_api_key
+AI_MODEL=gemini-3.5-flash-lite
+# Optional: live search returns a setup message until a valid key is supplied.
 SEARCH_API_KEY=your_search_api_key
 SEARCH_API_URL=https://api.tavily.com/search
 CLIENT_URL=http://localhost:5173
+TRUST_PROXY_HOPS=0
 ```
 
 **frontend/.env**
@@ -109,7 +111,8 @@ All routes are prefixed with `/api` and (except auth) require `Authorization: Be
 | Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `PATCH /auth/me` |
 | Chat | `GET/POST /chats`, `GET/POST /chats/:id/messages`, `POST /chats/:id/regenerate`, `DELETE /chats/:id` |
 | Memory | `GET/POST /memory`, `PATCH /memory/:id`, `DELETE /memory/:id`, `PATCH /memory/toggle` |
-| Documents | `POST /documents/upload`, `POST /documents/:id/ask`, `POST /documents/:id/summarize`, `POST /documents/analyze-image` |
+| Documents | `POST /documents/upload`, `POST /documents/:id/ask`, `POST /documents/:id/summarize`, `POST /documents/analyze-file`, `POST /documents/analyze-image` |
+| Image generation | `POST /images/generate` |
 | Study | `POST /study/generate` |
 | Coding | `POST /code/assist` |
 | Search | `POST /search` |
@@ -120,7 +123,7 @@ All routes are prefixed with `/api` and (except auth) require `Authorization: Be
 ## 6. Testing Checklist
 
 - [ ] Register + login, protected routes redirect to `/login` when logged out
-- [ ] Send a chat message, confirm streaming-style reply, regenerate, copy, delete, pin a chat
+- [ ] Send a chat message, confirm the reply, regenerate it, copy/delete messages, and pin a chat
 - [ ] Mic button requests permission and transcribes speech into the input box
 - [ ] Speaker icon on an AI reply reads it aloud; pause/stop works
 - [ ] Upload a PDF, ask a grounded question, confirm the answer cites only document content
@@ -139,7 +142,8 @@ All routes are prefixed with `/api` and (except auth) require `Authorization: Be
 **Backend → Render**
 1. Push `backend/` to a GitHub repo (or the root, with Render's root directory set to `backend`).
 2. New Web Service → connect repo → build command `npm install`, start command `npm start`.
-3. Add all `backend/.env` variables in Render's Environment tab. Set `CLIENT_URL` to your deployed frontend URL.
+3. Add the required `backend/.env` variables in Render's Environment tab. Set `CLIENT_URL` to your deployed frontend URL and `TRUST_PROXY_HOPS=1` when deployed behind Render's proxy.
+4. Uploaded files are stored in `backend/uploads`. Attach a persistent disk at that path or move uploads to object storage; ephemeral app files can disappear after a restart or redeploy.
 
 **Frontend → Vercel**
 1. Import the repo, set root directory to `frontend`.
@@ -152,9 +156,10 @@ All routes are prefixed with `/api` and (except auth) require `Authorization: Be
 
 ## 8. Notes on Scope
 
-This is a complete, functioning implementation of every core module in the spec (auth, AI chat with memory, voice I/O, PDF chat, image understanding, web search, study mode, coding mode, resume builder, report generator, multi-language responses, PWA, admin dashboard). A few things worth knowing for a viva/demo:
+The core modules are implemented, but external services still need valid configuration and each deployment should be manually verified. A few things worth knowing for a viva/demo:
 
-- **AI provider**: wired to the Anthropic Claude API by default. Swap the client in `aiService.js` if your institution requires OpenAI specifically — the rest of the app is provider-agnostic.
+- **AI provider**: wired to Gemini through Google's current JavaScript SDK. The text model is configurable with `AI_MODEL`; image generation uses a separate Gemini image model and requires access to that model on the API project.
+- **Live search**: optional and configured separately. The default request/response format matches Tavily; other providers need their own request and result mapping in `searchService.js`.
 - **Document retrieval** uses a lightweight keyword-overlap scorer instead of a vector database, which keeps the project dependency-free and easy to explain in a viva, but is less precise than embeddings on very large documents.
 - **Voice** uses the browser's built-in Web Speech API (no paid service, works offline for playback) — it's not supported in every browser (notably not fully in Firefox), so the mic button hides itself gracefully when unsupported.
 - **Rate limiting** is set generously for demo purposes; tighten `backend/server.js` limiter values for production.

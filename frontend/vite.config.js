@@ -9,11 +9,11 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/icon-192.png", "icons/icon-512.png"],
       manifest: {
-        name: "AI Smart Assistant",
-        short_name: "AI Assistant",
-        description: "Ask. Learn. Code. Create. Search. Analyze.",
-        theme_color: "#0b0b14",
-        background_color: "#0b0b14",
+        name: "RamAI Smart Assistant",
+        short_name: "RamAI",
+        description: "Ask. Learn. Code. Create. Analyze.",
+        theme_color: "#f1f5f9",
+        background_color: "#f8fafc",
         display: "standalone",
         start_url: "/",
         icons: [

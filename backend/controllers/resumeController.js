@@ -1,5 +1,5 @@
 const Resume = require("../models/Resume");
-const Usage = require("../models/Usage");
+const { recordUsage } = require("../services/usageService");
 const aiService = require("../services/aiService");
 
 // GET /api/resume
@@ -15,15 +15,22 @@ exports.listResumes = async (req, res, next) => {
 // POST /api/resume  (create/update full resume data)
 exports.saveResume = async (req, res, next) => {
   try {
-    const { id, ...data } = req.body;
+    const resumeId = req.body.id || req.body._id;
+    const allowedFields = [
+      "title", "personalInfo", "summary", "education", "skills", "projects",
+      "experience", "certifications", "achievements", "generatedSummary", "generatedCoverLetter",
+    ];
+    const data = Object.fromEntries(allowedFields
+      .filter((field) => req.body[field] !== undefined)
+      .map((field) => [field, req.body[field]]));
     let resume;
-    if (id) {
-      resume = await Resume.findOneAndUpdate({ _id: id, user: req.user._id }, data, { new: true });
+    if (resumeId) {
+      resume = await Resume.findOneAndUpdate({ _id: resumeId, user: req.user._id }, { $set: data }, { new: true, runValidators: true });
       if (!resume) return res.status(404).json({ success: false, message: "Resume not found" });
     } else {
       resume = await Resume.create({ ...data, user: req.user._id });
     }
-    res.json({ success: true, resume });
+    res.status(resumeId ? 200 : 201).json({ success: true, resume });
   } catch (err) {
     next(err);
   }
@@ -51,7 +58,7 @@ exports.generateSection = async (req, res, next) => {
     if (section === "coverLetter") resume.generatedCoverLetter = generated;
     await resume.save();
 
-    await Usage.create({ user: req.user._id, action: "resume", meta: { section } });
+    await recordUsage(req.user._id, "resume", { section });
     res.json({ success: true, generated, resume });
   } catch (err) {
     next(err);

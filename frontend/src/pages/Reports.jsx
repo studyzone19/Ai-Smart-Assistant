@@ -139,6 +139,7 @@ export default function Reports() {
               <label className="text-xs font-medium text-slate-300 mb-1 block">Topic</label>
               <input
                 value={topic}
+                maxLength={300}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g. Impact of AI on Healthcare"
                 required
@@ -165,6 +166,7 @@ export default function Reports() {
               <label className="text-xs font-medium text-slate-300 mb-1 block">Additional Notes (Optional)</label>
               <textarea
                 value={notes}
+                maxLength={10000}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
                 placeholder="Add special constraints, focus points, or data..."

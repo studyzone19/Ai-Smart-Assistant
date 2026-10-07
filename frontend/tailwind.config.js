@@ -5,18 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: "#0b0b14",
-        surface: "#13131f",
-        surface2: "#1a1a2a",
-        border: "#272740",
-        accent: "#8b5cf6",
-        accent2: "#06b6d4",
+        bg: "rgb(var(--color-bg) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        surface2: "rgb(var(--color-surface2) / <alpha-value>)",
+        border: "rgb(var(--color-border) / <alpha-value>)",
+        accent: "#14b8a6",
+        accent2: "#3b82f6",
       },
       backgroundImage: {
-        "glow-gradient": "radial-gradient(circle at 20% 20%, rgba(139,92,246,0.18), transparent 40%), radial-gradient(circle at 80% 0%, rgba(6,182,212,0.15), transparent 40%)",
+        "glow-gradient": "radial-gradient(circle at 20% 20%, rgba(20,184,166,0.14), transparent 40%), radial-gradient(circle at 80% 0%, rgba(59,130,246,0.12), transparent 40%)",
       },
       boxShadow: {
-        glass: "0 8px 32px rgba(0,0,0,0.4)",
+        glass: "0 18px 50px rgba(2,8,23,0.28)",
       },
     },
   },

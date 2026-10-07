@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const allowedDocTypes = [".pdf", ".docx", ".txt", ".csv"];
+const allowedDocTypes = [".pdf", ".docx", ".xlsx", ".pptx", ".txt", ".csv", ".md", ".json", ".html", ".htm", ".xml", ".log", ".yaml", ".yml", ".js", ".jsx", ".ts", ".tsx", ".py", ".java", ".c", ".cpp", ".h", ".css", ".sql"];
 const allowedImageTypes = [".png", ".jpg", ".jpeg", ".webp"];
 
 const fileFilter = (req, file, cb) => {
@@ -25,10 +25,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  limits: { fileSize: MAX_FILE_SIZE, files: 1, fields: 10, fieldSize: 64 * 1024, parts: 11 },
 });
 
+upload.MAX_FILE_SIZE = MAX_FILE_SIZE;
 module.exports = upload;

@@ -6,6 +6,12 @@ const messageSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     role: { type: String, enum: ["user", "assistant", "system"], required: true },
     content: { type: String, required: true },
+    attachment: {
+      originalName: String,
+      mimeType: String,
+      sizeBytes: Number,
+    },
+    attachmentPath: { type: String, select: false },
     sources: [{ title: String, url: String }],
     language: { type: String, enum: ["english", "hindi", "hinglish"], default: "english" },
     model: { type: String, default: "gemini-3.5-flash-lite" },

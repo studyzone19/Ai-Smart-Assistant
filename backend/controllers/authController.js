@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const Usage = require("../models/Usage");
+const { recordUsage } = require("../services/usageService");
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
@@ -19,15 +19,20 @@ const sanitizeUser = (user) => ({
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: "Name, email and password are required" });
+    if (typeof name !== "string" || !name.trim() || name.trim().length > 80
+      || typeof email !== "string" || !email.trim() || email.length > 254
+      || typeof password !== "string" || !password || Buffer.byteLength(password, "utf8") > 72) {
+      return res.status(400).json({ success: false, message: "Enter a name (up to 80 characters), a valid email, and a password of up to 72 UTF-8 bytes." });
     }
-    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters." });
+    }
+    const existing = await User.findOne({ email: email.trim().toLowerCase() });
     if (existing) {
       return res.status(409).json({ success: false, message: "Email already registered" });
     }
-    const user = await User.create({ name, email, password });
-    await Usage.create({ user: user._id, action: "register" });
+    const user = await User.create({ name: name.trim(), email: email.trim(), password });
+    await recordUsage(user._id, "register");
 
     const token = signToken(user._id);
     res.status(201).json({ success: true, token, user: sanitizeUser(user) });
@@ -39,17 +44,17 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
+    if (typeof email !== "string" || !email.trim() || typeof password !== "string" || !password || Buffer.byteLength(password, "utf8") > 72) {
       return res.status(400).json({ success: false, message: "Email and password are required" });
     }
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const user = await User.findOne({ email: email.trim().toLowerCase() }).select("+password");
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
     if (!user.isActive) {
       return res.status(403).json({ success: false, message: "Account deactivated" });
     }
-    await Usage.create({ user: user._id, action: "login" });
+    await recordUsage(user._id, "login");
 
     const token = signToken(user._id);
     res.json({ success: true, token, user: sanitizeUser(user) });
@@ -66,10 +71,22 @@ exports.updateProfile = async (req, res, next) => {
   try {
     const { name, preferredLanguage, memoryEnabled, avatarColor } = req.body;
     const user = req.user;
-    if (name !== undefined) user.name = name;
-    if (preferredLanguage !== undefined) user.preferredLanguage = preferredLanguage;
-    if (memoryEnabled !== undefined) user.memoryEnabled = memoryEnabled;
-    if (avatarColor !== undefined) user.avatarColor = avatarColor;
+    if (name !== undefined) {
+      if (typeof name !== "string" || !name.trim() || name.trim().length > 80) return res.status(400).json({ success: false, message: "Display name must be 1–80 characters." });
+      user.name = name.trim();
+    }
+    if (preferredLanguage !== undefined) {
+      if (!["english", "hindi", "hinglish"].includes(preferredLanguage)) return res.status(400).json({ success: false, message: "Choose a supported response language." });
+      user.preferredLanguage = preferredLanguage;
+    }
+    if (memoryEnabled !== undefined) {
+      if (typeof memoryEnabled !== "boolean") return res.status(400).json({ success: false, message: "Memory setting must be true or false." });
+      user.memoryEnabled = memoryEnabled;
+    }
+    if (avatarColor !== undefined) {
+      if (typeof avatarColor !== "string" || !/^#[0-9a-f]{6}$/i.test(avatarColor)) return res.status(400).json({ success: false, message: "Choose a valid avatar color." });
+      user.avatarColor = avatarColor;
+    }
     await user.save();
     res.json({ success: true, user: sanitizeUser(user) });
   } catch (err) {

@@ -4,7 +4,65 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Download, ImageIcon, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { isValidElement, useState } from "react";
+
+const FLOW_EDGE = /(\w+)(?:\[(.*?)\]|\((.*?)\)|\{(.*?)\})?\s*--?>\s*(?:\|([^|]+)\|\s*)?(\w+)(?:\[(.*?)\]|\((.*?)\)|\{(.*?)\})?/g;
+const FLOW_NODE = /\b(\w+)\s*(?:\[([^\]]*)\]|\(([^)]*)\)|\{([^}]*)\})/g;
+
+function FlowDiagram({ source }) {
+  const labels = new Map();
+  for (const line of source.split("\n")) {
+    FLOW_NODE.lastIndex = 0;
+    for (const match of line.matchAll(FLOW_NODE)) {
+      const [, id, square, round, decision] = match;
+      labels.set(id, (square || round || decision || id).replaceAll('"', "").trim());
+    }
+  }
+
+  const edges = [];
+  for (const line of source.split("\n")) {
+    if (/^\s*(flowchart|graph)\s/i.test(line) || !line.includes("-->")) continue;
+    FLOW_EDGE.lastIndex = 0;
+    for (const match of line.matchAll(FLOW_EDGE)) {
+      const [, fromId, fromSquare, fromRound, fromDecision, edgeLabel, toId, toSquare, toRound, toDecision] = match;
+      const labelFor = (id, square, round, decision) => (square || round || decision || labels.get(id) || id).replaceAll('"', "").trim();
+      labels.set(fromId, labelFor(fromId, fromSquare, fromRound, fromDecision));
+      labels.set(toId, labelFor(toId, toSquare, toRound, toDecision));
+      edges.push({ fromId, toId, from: labels.get(fromId), to: labels.get(toId), label: edgeLabel?.trim() });
+      if (edges.length >= 8) break;
+    }
+    if (edges.length >= 8) break;
+  }
+
+  if (!edges.length) return null;
+  const colors = ["teal", "blue", "violet", "amber", "rose", "cyan", "emerald", "indigo"];
+  const isLinear = edges.every((edge, index) => index === 0 || edges[index - 1].toId === edge.fromId);
+  const linearNodes = isLinear
+    ? [edges[0].fromId, ...edges.map((edge) => edge.toId)].filter((id, index, all) => all.indexOf(id) === index)
+    : null;
+  return (
+    <div className="flow-diagram" role="img" aria-label="Colorful step-by-step diagram">
+      {isLinear ? linearNodes.map((id, index) => (
+        <div className="flow-diagram-row" key={id}>
+          <div className={`flow-diagram-node flow-${colors[index % colors.length]}`}>{labels.get(id) || id}</div>
+          {index < linearNodes.length - 1 && <div className="flow-diagram-connector" aria-hidden="true">
+            {edges[index]?.label && <span>{edges[index].label}</span>}
+            <span className="flow-diagram-arrow">↓</span>
+          </div>}
+        </div>
+      )) : edges.map((edge, index) => (
+        <div className="flow-diagram-row" key={`${edge.fromId}-${edge.toId}-${index}`}>
+          <div className={`flow-diagram-node flow-${colors[index % colors.length]}`}>{edge.from}</div>
+          <div className="flow-diagram-connector" aria-hidden="true">
+            {edge.label && <span>{edge.label}</span>}
+            <span className="flow-diagram-arrow">↓</span>
+          </div>
+          <div className={`flow-diagram-node flow-${colors[(index + 1) % colors.length]}`}>{edge.to}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function AIImage({ src, alt, userName }) {
   const [status, setStatus] = useState("loading"); // loading | loaded | error
@@ -106,8 +164,16 @@ export default function MarkdownView({ content }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          pre({ children }) {
+            if (isValidElement(children) && /language-mermaid/i.test(children.props.className || "")) return children;
+            return <pre>{children}</pre>;
+          },
           code({ inline, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || "");
+            if (!inline && match?.[1]?.toLowerCase() === "mermaid") {
+              const diagram = <FlowDiagram source={String(children).replace(/\n$/, "")} />;
+              if (diagram) return diagram;
+            }
             if (!inline && match) {
               return (
                 <div className="my-2 rounded-xl overflow-x-auto border border-slate-700/60 max-w-full">

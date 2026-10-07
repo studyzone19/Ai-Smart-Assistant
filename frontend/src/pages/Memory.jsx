@@ -117,6 +117,7 @@ export default function Memory() {
       <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-2 mb-5">
         <input
           value={newContent}
+          maxLength={2000}
           onChange={(e) => setNewContent(e.target.value)}
           placeholder="e.g. Always write code in TypeScript and use Tailwind CSS"
           className="flex-1 bg-surface2 border border-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm outline-none focus:border-accent text-white placeholder-slate-500"

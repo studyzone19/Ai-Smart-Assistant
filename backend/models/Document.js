@@ -9,6 +9,7 @@ const documentSchema = new mongoose.Schema(
     mimeType: { type: String, required: true },
     sizeBytes: { type: Number, required: true },
     fullText: { type: String, default: "" },
+    isTruncated: { type: Boolean, default: false },
     chunks: [
       {
         index: Number,

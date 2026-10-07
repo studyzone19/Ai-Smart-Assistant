@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText, Upload, Loader2, Send, Image as ImageIcon, Trash2,
   FileCheck2, Sparkles, MessageSquare, AlertCircle
@@ -7,19 +8,21 @@ import api from "../services/api";
 import MarkdownView from "../components/MarkdownView.jsx";
 
 export default function Documents() {
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState([]);
   const [activeDoc, setActiveDoc] = useState(null);
   const [question, setQuestion] = useState("");
-  const [qaLog, setQaLog] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState("");
   const [asking, setAsking] = useState(false);
+  const [askError, setAskError] = useState("");
   const [imageQuestion, setImageQuestion] = useState("");
   const [imageResult, setImageResult] = useState("");
   const [imageLoading, setImageLoading] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState("files"); // "files" | "qa"
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
-  const qaBottomRef = useRef(null);
 
   const loadDocs = async () => {
     try {
@@ -34,19 +37,23 @@ export default function Documents() {
     loadDocs();
   }, []);
 
-  useEffect(() => {
-    qaBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [qaLog, asking]);
-
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError("This file is larger than the 15 MB limit. Choose a smaller file.");
+      e.target.value = "";
+      return;
+    }
+    setUploadError("");
+    setUploadProgress(0);
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
     try {
       const { data } = await api.post("/documents/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (event) => { if (event.total) setUploadProgress(Math.round((event.loaded * 100) / event.total)); },
       });
       await loadDocs();
       if (data.document) {
@@ -54,33 +61,33 @@ export default function Documents() {
         setActiveMobileTab("qa");
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Upload failed");
+      setUploadError(err.response?.status === 413
+        ? "This file is larger than the 15 MB limit. Choose a smaller file."
+        : err.response?.data?.message || (err.request ? "Could not reach the server. Check your connection and retry." : "Upload failed. Please try again."));
     } finally {
       setUploading(false);
+      setUploadProgress(0);
       e.target.value = "";
     }
   };
 
   const handleSelectDoc = (doc) => {
     setActiveDoc(doc);
-    setQaLog([]);
+    setAskError("");
     setActiveMobileTab("qa");
   };
 
   const handleAsk = async () => {
-    if (!question.trim() || !activeDoc) return;
+    if (!question.trim() || !activeDoc || asking) return;
     setAsking(true);
-    const q = question;
-    setQuestion("");
-    setQaLog((prev) => [...prev, { role: "user", content: q }]);
+    setAskError("");
+    const q = question.trim();
     try {
       const { data } = await api.post(`/documents/${activeDoc._id}/ask`, { question: q });
-      setQaLog((prev) => [...prev, { role: "assistant", content: data.answer }]);
+      setQuestion("");
+      navigate(`/chat/${data.chatId}`);
     } catch (err) {
-      setQaLog((prev) => [
-        ...prev,
-        { role: "assistant", content: `⚠️ ${err.response?.data?.message || "Failed to answer"}` },
-      ]);
+      setAskError(err.response?.data?.message || (err.request ? "Could not reach the server. Check your connection and try again." : "Failed to answer. Please try again."));
     } finally {
       setAsking(false);
     }
@@ -92,7 +99,6 @@ export default function Documents() {
       await api.delete(`/documents/${id}`);
       if (activeDoc?._id === id) {
         setActiveDoc(null);
-        setQaLog([]);
       }
       loadDocs();
     } catch (err) {
@@ -166,12 +172,13 @@ export default function Documents() {
               <FileText size={18} className="text-accent" />
               <h2 className="font-semibold text-sm text-white">PDF & Doc Chat</h2>
             </div>
-            <p className="text-xs text-slate-400 mb-2">Upload any PDF, DOCX, or CSV to query facts directly.</p>
+            <p className="text-xs text-slate-400 mb-1">Upload a document up to 15 MB. Scanned PDFs are read with AI.</p>
+            <p className="text-[10px] leading-4 text-slate-500 mb-2">PDF, DOCX, XLSX, PPTX, CSV, TXT, MD, JSON, HTML/HTM, XML, LOG, YAML/YML, JS/JSX/TS/TSX, PY, JAVA, C/C++, H, CSS, SQL</p>
 
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.docx,.txt,.csv"
+              accept=".pdf,.docx,.xlsx,.pptx,.txt,.csv,.md,.json,.html,.htm,.xml,.log,.yaml,.yml,.js,.jsx,.ts,.tsx,.py,.java,.c,.cpp,.h,.css,.sql"
               onChange={handleUpload}
               className="hidden"
             />
@@ -183,6 +190,8 @@ export default function Documents() {
               {uploading ? <Loader2 size={16} className="animate-spin text-accent" /> : <Upload size={16} className="text-accent" />}
               <span className="font-medium">{uploading ? "Processing document..." : "Upload Document"}</span>
             </button>
+            {uploading && <div role="status" className="mt-2 space-y-1"><div className="flex justify-between text-[11px] text-slate-400"><span>{uploadProgress >= 100 ? "Reading and indexing…" : "Uploading…"}</span><span>{uploadProgress}%</span></div><div className="h-1 rounded-full bg-white/10"><div className="h-1 rounded-full bg-accent transition-all" style={{ width: `${Math.max(uploadProgress, 5)}%` }} /></div></div>}
+            {uploadError && <p role="alert" className="mt-2 text-xs leading-5 text-red-300">{uploadError}</p>}
           </div>
 
           <div className="space-y-1 flex-1 overflow-y-auto min-h-[100px] max-h-56 lg:max-h-none">
@@ -241,7 +250,7 @@ export default function Documents() {
             <input
               ref={imageInputRef}
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"
               onChange={handleImageUpload}
               className="hidden"
             />
@@ -290,9 +299,9 @@ export default function Documents() {
                   <p className="text-xs sm:text-sm font-semibold text-white truncate">
                     {activeDoc.originalName}
                   </p>
-                  <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                    Document ready for Q&A
+                  <p className={`text-[10px] flex items-center gap-1 mt-0.5 ${activeDoc.isTruncated ? "text-amber-500" : "text-emerald-400"}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full inline-block ${activeDoc.isTruncated ? "bg-amber-500" : "bg-emerald-400"}`} />
+                    {activeDoc.isTruncated ? "Partially indexed" : "Document ready for Q&A"}
                   </p>
                 </div>
                 <button
@@ -304,46 +313,24 @@ export default function Documents() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
-                {qaLog.length === 0 && (
-                  <div className="p-4 text-center text-xs text-slate-400 bg-surface2/30 rounded-xl border border-dashed border-border max-w-md mx-auto my-6">
-                    💡 Ask any question! Answers will be strictly based on content retrieved from{" "}
-                    <span className="text-white font-medium">{activeDoc.originalName}</span>.
-                  </div>
-                )}
-                {qaLog.map((m, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[92%] sm:max-w-[85%] rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-sm ${
-                        m.role === "user"
-                          ? "bg-accent/25 border border-accent/40 text-white rounded-br-sm"
-                          : "bg-surface2 border border-border text-slate-200 rounded-bl-sm"
-                      }`}
-                    >
-                      {m.role === "assistant" ? (
-                        <MarkdownView content={m.content} />
-                      ) : (
-                        <p className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed">{m.content}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                <div className={`mx-auto my-6 max-w-md rounded-xl border border-dashed p-4 text-center text-xs leading-5 ${activeDoc.isTruncated ? "border-amber-500/40 bg-amber-500/5 text-amber-700" : "border-border bg-surface2/30 text-slate-400"}`}>
+                  {activeDoc.isTruncated && <p className="mb-2 font-semibold">Only the first 500,000 characters were indexed. Split this file to ask about later sections.</p>}
+                  Ask a question about <span className="font-medium text-white">{activeDoc.originalName}</span>. The answer will open in your full chat so you can read and continue the conversation there.
+                </div>
                 {asking && (
-                  <div className="flex items-center gap-2 text-slate-400 text-xs sm:text-sm bg-surface2 border border-border rounded-xl px-3 py-2 w-fit">
+                  <div role="status" className="mx-auto flex w-fit items-center gap-2 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-slate-400">
                     <Loader2 size={14} className="animate-spin text-accent" />
-                    <span>Searching through document...</span>
+                    <span>Preparing your answer...</span>
                   </div>
                 )}
-                <div ref={qaBottomRef} />
               </div>
 
-              <div className="p-2 sm:p-3 border-t border-border bg-[#0d0d17]/80">
+              <div className="p-2 sm:p-3 border-t border-border bg-surface/80">
                 <div className="flex items-center gap-2 bg-surface2 border border-border focus-within:border-accent/60 rounded-2xl px-3 py-1.5 sm:py-2">
                   <input
                     value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
+                    maxLength={12000}
+                    onChange={(e) => { setQuestion(e.target.value); setAskError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleAsk()}
                     disabled={activeDoc.status !== "ready"}
                     placeholder={
@@ -361,6 +348,7 @@ export default function Documents() {
                     <Send size={15} />
                   </button>
                 </div>
+                {askError && <p role="alert" className="mt-2 px-2 text-xs leading-5 text-red-300">{askError} Your question is still here. Try again.</p>}
               </div>
             </>
           )}

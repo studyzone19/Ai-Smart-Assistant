@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Settings as SettingsIcon, Save, Loader2, Check } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
+import { Settings as SettingsIcon, Save, Loader2, Check, Sun, Moon } from "lucide-react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -12,6 +13,7 @@ const COLORS = ["#8b5cf6", "#06b6d4", "#ec4899", "#f59e0b", "#10b981", "#ef4444"
 
 export default function Settings() {
   const { user, updateUser } = useAuth();
+  const { theme, toggleTheme } = useOutletContext();
   const [name, setName] = useState(user?.name || "");
   const [language, setLanguage] = useState(user?.preferredLanguage || "english");
   const [color, setColor] = useState(user?.avatarColor || "#8b5cf6");
@@ -43,6 +45,21 @@ export default function Settings() {
           <p className="text-[11px] text-slate-400">Customize your profile, language, and theme colors</p>
         </div>
       </div>
+
+      <section className="mb-5 rounded-xl border border-border bg-surface2/50 p-3.5 sm:p-4" aria-labelledby="appearance-title">
+        <div className="mb-3">
+          <h3 id="appearance-title" className="text-sm font-medium text-white">Appearance</h3>
+          <p className="mt-0.5 text-xs text-slate-400">Choose how AI Smart Assistant looks on this device.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label="Color theme">
+          <button type="button" onClick={() => theme !== "light" && toggleTheme()} aria-pressed={theme === "light"} className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-colors ${theme === "light" ? "border-accent/60 bg-accent/15 text-white" : "border-border bg-surface text-slate-400 hover:text-white"}`}>
+            <Sun size={16} /> White mode
+          </button>
+          <button type="button" onClick={() => theme !== "dark" && toggleTheme()} aria-pressed={theme === "dark"} className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-colors ${theme === "dark" ? "border-accent/60 bg-accent/15 text-white" : "border-border bg-surface text-slate-400 hover:text-white"}`}>
+            <Moon size={16} /> Dark mode
+          </button>
+        </div>
+      </section>
 
       <form onSubmit={handleSave} className="space-y-4 sm:space-y-5">
         <div>
@@ -93,7 +110,7 @@ export default function Settings() {
                 key={c}
                 onClick={() => setColor(c)}
                 className={`w-9 h-9 rounded-full transition-all flex items-center justify-center ${
-                  color === c ? "ring-2 ring-white ring-offset-2 ring-offset-[#0b0b14] scale-110" : "hover:scale-105 opacity-80"
+                  color === c ? "ring-2 ring-white ring-offset-2 ring-offset-bg scale-110" : "hover:scale-105 opacity-80"
                 }`}
                 style={{ background: c }}
               >

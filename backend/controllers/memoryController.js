@@ -14,9 +14,10 @@ exports.listMemories = async (req, res, next) => {
 exports.addMemory = async (req, res, next) => {
   try {
     const { content, category } = req.body;
-    if (!content || !content.trim()) {
-      return res.status(400).json({ success: false, message: "Memory content is required" });
+    if (typeof content !== "string" || !content.trim() || content.length > 2000) {
+      return res.status(400).json({ success: false, message: "Memory must contain 1–2,000 characters." });
     }
+    if (category && !["preference", "project", "language", "skill", "other"].includes(category)) return res.status(400).json({ success: false, message: "Choose a valid memory category." });
     const memory = await Memory.create({
       user: req.user._id,
       content: content.trim(),
@@ -35,9 +36,18 @@ exports.updateMemory = async (req, res, next) => {
     const { content, category, isActive } = req.body;
     const memory = await Memory.findOne({ _id: req.params.id, user: req.user._id });
     if (!memory) return res.status(404).json({ success: false, message: "Memory not found" });
-    if (content !== undefined) memory.content = content;
-    if (category !== undefined) memory.category = category;
-    if (isActive !== undefined) memory.isActive = isActive;
+    if (content !== undefined) {
+      if (typeof content !== "string" || !content.trim() || content.length > 2000) return res.status(400).json({ success: false, message: "Memory must contain 1–2,000 characters." });
+      memory.content = content.trim();
+    }
+    if (category !== undefined) {
+      if (!["preference", "project", "language", "skill", "other"].includes(category)) return res.status(400).json({ success: false, message: "Choose a valid memory category." });
+      memory.category = category;
+    }
+    if (isActive !== undefined) {
+      if (typeof isActive !== "boolean") return res.status(400).json({ success: false, message: "Memory status must be true or false." });
+      memory.isActive = isActive;
+    }
     await memory.save();
     res.json({ success: true, memory });
   } catch (err) {
@@ -70,7 +80,8 @@ exports.clearAllMemories = async (req, res, next) => {
 exports.toggleMemory = async (req, res, next) => {
   try {
     const { enabled } = req.body;
-    req.user.memoryEnabled = !!enabled;
+    if (typeof enabled !== "boolean") return res.status(400).json({ success: false, message: "Memory setting must be true or false." });
+    req.user.memoryEnabled = enabled;
     await req.user.save();
     res.json({ success: true, memoryEnabled: req.user.memoryEnabled });
   } catch (err) {

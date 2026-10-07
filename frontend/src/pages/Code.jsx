@@ -136,6 +136,7 @@ export default function Code() {
             <label className="text-xs font-medium text-slate-300 mb-1 block">What do you want to build or fix?</label>
             <textarea
               value={task}
+              maxLength={12000}
               onChange={(e) => setTask(e.target.value)}
               rows={3}
               required
@@ -149,6 +150,7 @@ export default function Code() {
               <label className="text-xs font-medium text-slate-300 mb-1 block">Paste existing code snippet</label>
               <textarea
                 value={code}
+                maxLength={30000}
                 onChange={(e) => setCode(e.target.value)}
                 rows={5}
                 placeholder="// Paste code here..."

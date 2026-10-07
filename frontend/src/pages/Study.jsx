@@ -97,6 +97,7 @@ export default function Study() {
             <label className="text-xs font-medium text-slate-300 mb-1 block">Subject</label>
             <input
               value={form.subject}
+              maxLength={200}
               onChange={update("subject")}
               placeholder="e.g. Data Structures, Biology, History"
               required
@@ -108,6 +109,7 @@ export default function Study() {
             <label className="text-xs font-medium text-slate-300 mb-1 block">Topic</label>
             <input
               value={form.topic}
+              maxLength={300}
               onChange={update("topic")}
               placeholder="e.g. Binary Search Trees, Photosynthesis"
               required
