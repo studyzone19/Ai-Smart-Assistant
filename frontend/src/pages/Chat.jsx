@@ -759,11 +759,11 @@ ${content || "Explain this file in notes."}` : content }]);
                   <Plus size={20} />
                 </button>
                 {showAttachMenu && (
-                  <div role="menu" onKeyDown={(event) => { if (event.key === "Escape") setShowAttachMenu(false); }} className="absolute bottom-full left-0 z-50 mb-3 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/10 bg-[#252525] p-2 shadow-2xl">
+                  <div role="menu" onKeyDown={(event) => { if (event.key === "Escape") setShowAttachMenu(false); }} className="absolute bottom-full left-0 z-50 mb-3 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border bg-surface p-2 shadow-2xl">
                     <p className="px-3 pb-2 pt-1 text-xs font-medium text-slate-400">Add</p>
-                    <button type="button" role="menuitem" onClick={() => { setShowAttachMenu(false); imageInputRef.current?.click(); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-100 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">
-                      <Paperclip size={17} className="shrink-0 text-slate-300" />
-                      <span><span className="block">Add photos &amp; files</span><span className="mt-0.5 block text-xs text-slate-400">Upload from your device</span></span>
+                    <button type="button" role="menuitem" onClick={() => { setShowAttachMenu(false); imageInputRef.current?.click(); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-100 transition-colors hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/50">
+                      <Paperclip size={17} className="shrink-0 text-slate-400" />
+                      <span><span className="block font-medium">Add photos &amp; files</span><span className="mt-0.5 block text-xs text-slate-400">Upload from your device</span></span>
                     </button>
                   </div>
                 )}
