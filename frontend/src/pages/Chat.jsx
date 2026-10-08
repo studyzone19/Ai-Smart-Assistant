@@ -816,14 +816,11 @@ ${content || "Explain this file in notes."}` : content }]);
               </button>
             </div>
 
-            <p className="px-1 text-[10px] leading-4 text-slate-500">Attach a file · Max 15 MB</p>
+
             {sending && attachedImage && <div role="status" aria-live="polite" className="space-y-1 px-1"><div className="flex justify-between text-[11px] text-slate-400"><span>{uploadProgress >= 100 ? "Reading file and preparing your answer…" : "Uploading file…"}</span><span>{uploadProgress}%</span></div><div className="h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-teal-400 transition-all" style={{ width: `${Math.max(uploadProgress, 5)}%` }} /></div></div>}
             {composerError && <div role="alert" className="flex flex-wrap items-center gap-2 px-1 text-xs text-red-300"><span className="flex-1">{composerError} Your text and file are still here.</span><button type="button" onClick={handleSend} disabled={sending} className="inline-flex items-center gap-1 rounded-lg border border-red-300/20 px-2 py-1 font-medium hover:bg-red-400/10 disabled:opacity-50"><RefreshCw size={12} /> Retry</button></div>}
 
-            {/* Disclaimer */}
-            <p className="text-[11px] text-slate-500 text-center select-none">
-              AI Smart Assistant can make mistakes. Consider checking important information.
-            </p>
+
           </div>
         </div>
       </div>
