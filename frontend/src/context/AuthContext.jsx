@@ -2,16 +2,44 @@ import { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
 
 const AuthContext = createContext(null);
+const USER_STORAGE_KEY = "ai_assistant_user";
+const TOKEN_STORAGE_KEY = "ai_assistant_token";
+
+function getStoredUser() {
+  try {
+    const stored = localStorage.getItem(USER_STORAGE_KEY);
+    if (!stored) return null;
+
+    const user = JSON.parse(stored);
+    if (!user || typeof user !== "object" || Array.isArray(user)) {
+      throw new Error("Saved user data is invalid");
+    }
+    return user;
+  } catch {
+    try {
+      localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch {
+      // Storage can be unavailable in private browsing or restricted contexts.
+    }
+    return null;
+  }
+}
+
+function saveSession(data) {
+  if (!data?.token || !data?.user || typeof data.user !== "object") {
+    throw new Error("The server returned an invalid sign-in response. Please try again.");
+  }
+  localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("ai_assistant_user");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState(getStoredUser);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("ai_assistant_token");
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
     if (!token) {
       setLoading(false);
       return;
@@ -20,11 +48,11 @@ export function AuthProvider({ children }) {
       .get("/auth/me")
       .then(({ data }) => {
         setUser(data.user);
-        localStorage.setItem("ai_assistant_user", JSON.stringify(data.user));
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       })
       .catch(() => {
-        localStorage.removeItem("ai_assistant_token");
-        localStorage.removeItem("ai_assistant_user");
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        localStorage.removeItem(USER_STORAGE_KEY);
         setUser(null);
       })
       .finally(() => setLoading(false));
@@ -32,32 +60,29 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
-    localStorage.setItem("ai_assistant_token", data.token);
-    localStorage.setItem("ai_assistant_user", JSON.stringify(data.user));
+    saveSession(data);
     setUser(data.user);
     return data.user;
   };
 
   const register = async (name, email, password) => {
     const { data } = await api.post("/auth/register", { name, email, password });
-    localStorage.setItem("ai_assistant_token", data.token);
-    localStorage.setItem("ai_assistant_user", JSON.stringify(data.user));
+    saveSession(data);
     setUser(data.user);
     return data.user;
   };
 
   const logout = () => {
-    localStorage.removeItem("ai_assistant_token");
-    localStorage.removeItem("ai_assistant_user");
     setUser(null);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_STORAGE_KEY);
   };
 
   const updateUser = (patch) => {
-    setUser((prev) => {
-      const next = { ...prev, ...patch };
-      localStorage.setItem("ai_assistant_user", JSON.stringify(next));
-      return next;
-    });
+    if (!user) return;
+    const next = { ...user, ...patch };
+    setUser(next);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(next));
   };
 
   return (
