@@ -35,33 +35,33 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex bg-[#0f0f0f] overflow-hidden">
+    <div className="min-h-[100dvh] flex bg-slate-50 overflow-hidden">
 
       {/* ── LEFT PANEL ── */}
-      <div className="hidden lg:flex flex-col justify-between w-[52%] bg-gradient-to-br from-[#0d1117] via-[#111827] to-[#0d1117] p-12 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
+      <div className="hidden lg:flex flex-col justify-between w-[52%] bg-white p-12 relative overflow-hidden border-r border-slate-200 shadow-sm">
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-violet-400/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-cyan-400/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
 
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
-            <Sparkles size={20} className="text-white" />
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20 text-[#ffffff]">
+            <Sparkles size={20} />
           </div>
           <div>
-            <p className="font-bold text-white text-base leading-tight">AI Smart Assistant</p>
+            <p className="font-bold text-slate-800 text-base leading-tight">AI Smart Assistant</p>
             <p className="text-[11px] text-slate-500">Ask · Learn · Code · Create</p>
           </div>
         </div>
 
         {/* Hero text */}
         <div className="relative z-10 space-y-6">
-          <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
+          <h1 className="text-4xl xl:text-5xl font-bold text-slate-800 leading-tight">
             Start Your<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-cyan-500">
               AI Journey Today
             </span>
           </h1>
-          <p className="text-slate-400 text-lg max-w-sm leading-relaxed">
+          <p className="text-slate-500 text-lg max-w-sm leading-relaxed">
             Join thousands of students and developers using AI to learn faster and build smarter.
           </p>
 
@@ -69,13 +69,13 @@ export default function Register() {
             {FEATURES.map(({ icon: Icon, label, desc }) => (
               <div
                 key={label}
-                className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.06] rounded-2xl px-4 py-3"
+                className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 shadow-sm"
               >
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500/20 to-cyan-500/20 flex items-center justify-center shrink-0">
-                  <Icon size={15} className="text-violet-300" />
+                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+                  <Icon size={15} className="text-violet-600" />
                 </div>
                 <div>
-                  <p className="text-white text-xs font-semibold">{label}</p>
+                  <p className="text-slate-700 text-xs font-semibold">{label}</p>
                   <p className="text-slate-500 text-[10px]">{desc}</p>
                 </div>
               </div>
@@ -83,38 +83,36 @@ export default function Register() {
           </div>
         </div>
 
-        <p className="text-slate-600 text-xs relative z-10">© 2026 AI Smart Assistant — Built by Ram Prajapati</p>
+        <p className="text-slate-400 text-xs relative z-10">© 2026 AI Smart Assistant — Built by Ram Prajapati</p>
       </div>
 
       {/* ── RIGHT PANEL ── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-10 py-10 relative overflow-y-auto">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/5 rounded-full blur-[80px]" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px]" />
 
         <div className="w-full max-w-[400px] relative z-10">
 
           {/* Logo — centered inside right panel */}
           <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <Sparkles size={22} className="text-white" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20 text-[#ffffff]">
+              <Sparkles size={22} />
             </div>
             <div className="text-center">
-              <p className="font-bold text-white text-lg">AI Smart Assistant</p>
+              <p className="font-bold text-slate-800 text-lg">AI Smart Assistant</p>
               <p className="text-xs text-slate-500 mt-0.5">Ask · Learn · Code · Create</p>
             </div>
           </div>
 
           {/* Heading — Centered */}
           <div className="mb-8 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Create account</h2>
-            <p className="text-slate-400 text-sm">Free forever — no credit card required</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Create account</h2>
+            <p className="text-slate-500 text-sm">Free forever — no credit card required</p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-5 flex items-start gap-2.5 bg-red-500/10 border border-red-500/25 rounded-2xl px-4 py-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
-              <p className="text-red-300 text-sm">{error}</p>
+            <div className="mb-5 flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
 
@@ -123,25 +121,25 @@ export default function Register() {
 
             {/* Name */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 block text-left">Full name</label>
+              <label className="text-xs font-medium text-slate-600 block text-left">Full name</label>
               <div className="relative">
-                <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
                   required
                   maxLength={80}
                   placeholder="Ram Prajapati"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] focus:border-violet-500/60 focus:bg-violet-500/5 rounded-2xl pl-11 pr-4 py-3.5 text-sm outline-none text-white placeholder-slate-600 transition-all duration-200"
+                  className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm outline-none text-slate-800 placeholder-slate-400 transition-all shadow-sm"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 block text-left">Email address</label>
+              <label className="text-xs font-medium text-slate-600 block text-left">Email address</label>
               <div className="relative">
-                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
                   type="email"
                   required
@@ -149,16 +147,16 @@ export default function Register() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] focus:border-violet-500/60 focus:bg-violet-500/5 rounded-2xl pl-11 pr-4 py-3.5 text-sm outline-none text-white placeholder-slate-600 transition-all duration-200"
+                  className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm outline-none text-slate-800 placeholder-slate-400 transition-all shadow-sm"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 block text-left">Password</label>
+              <label className="text-xs font-medium text-slate-600 block text-left">Password</label>
               <div className="relative">
-                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
                   type={showPass ? "text" : "password"}
                   required
@@ -167,12 +165,12 @@ export default function Register() {
                   placeholder="Min 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] focus:border-violet-500/60 focus:bg-violet-500/5 rounded-2xl pl-11 pr-12 py-3.5 text-sm outline-none text-white placeholder-slate-600 transition-all duration-200"
+                  className="w-full bg-white border border-slate-200 hover:border-slate-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl pl-11 pr-12 py-3.5 text-sm outline-none text-slate-800 placeholder-slate-400 transition-all shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
@@ -183,7 +181,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white rounded-2xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-500/20 active:scale-[0.99] transition-all duration-200"
+              className="w-full mt-2 bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 text-[#ffffff] rounded-2xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-violet-500/25 active:scale-[0.99] transition-all"
             >
               {loading ? (
                 <><Loader2 size={16} className="animate-spin" /> Creating account…</>
@@ -194,14 +192,14 @@ export default function Register() {
           </form>
 
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-white/[0.06]" />
-            <span className="text-slate-600 text-xs">or</span>
-            <div className="flex-1 h-px bg-white/[0.06]" />
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-slate-400 text-xs">or</span>
+            <div className="flex-1 h-px bg-slate-200" />
           </div>
 
-          <p className="text-center text-sm text-slate-500">
+          <p className="text-center text-sm text-slate-600">
             Already have an account?{" "}
-            <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+            <Link to="/login" className="text-violet-600 hover:text-violet-700 font-semibold transition-colors">
               Sign in
             </Link>
           </p>
