@@ -1,5 +1,7 @@
 const { recordUsage } = require("../services/usageService");
 const aiService = require("../services/aiService");
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
 
 // POST /api/study/generate  { subject, topic, level, difficulty, requestType }
 // requestType: "notes" | "important_questions" | "mcqs" | "flashcards" | "revision" | "practice_test"
@@ -21,6 +23,33 @@ exports.generateStudyContent = async (req, res, next) => {
       req.user.preferredLanguage
     );
     await recordUsage(req.user._id, "study", { subject, topic, requestType });
+
+    // Save automatically to Chat History
+    try {
+      const chatTitle = `[Study] ${subject}: ${topic}`.slice(0, 60);
+      const chat = await Chat.create({
+        user: req.user._id,
+        title: chatTitle,
+        mode: "study"
+      });
+      await Message.create([
+        {
+          chat: chat._id,
+          user: req.user._id,
+          role: "user",
+          content: `Subject: ${subject}\nTopic: ${topic}\nFormat: ${requestType}\nLevel: ${level || "undergraduate"}`
+        },
+        {
+          chat: chat._id,
+          user: req.user._id,
+          role: "assistant",
+          content
+        }
+      ]);
+    } catch (saveErr) {
+      console.error("Failed to save study chat history:", saveErr);
+    }
+
     res.json({ success: true, content });
   } catch (err) {
     next(err);

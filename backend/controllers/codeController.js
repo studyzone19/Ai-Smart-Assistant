@@ -1,5 +1,7 @@
 const { recordUsage } = require("../services/usageService");
 const aiService = require("../services/aiService");
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
 
 // POST /api/code/assist  { task, language, code, requestType }
 // requestType: "generate" | "debug" | "explain" | "optimize"
@@ -18,6 +20,37 @@ exports.codeAssist = async (req, res, next) => {
       req.user.preferredLanguage
     );
     await recordUsage(req.user._id, "coding", { language, requestType });
+
+    // Save automatically to Chat History
+    try {
+      const chatTitle = `[Code] ${language}: ${task}`.slice(0, 60);
+      const chat = await Chat.create({
+        user: req.user._id,
+        title: chatTitle,
+        mode: "coding"
+      });
+      const userMessageContent = code 
+        ? `Task: ${task}\nLanguage: ${language}\nAction: ${requestType}\n\n\`\`\`${language}\n${code}\n\`\`\``
+        : `Task: ${task}\nLanguage: ${language}\nAction: ${requestType}`;
+
+      await Message.create([
+        {
+          chat: chat._id,
+          user: req.user._id,
+          role: "user",
+          content: userMessageContent
+        },
+        {
+          chat: chat._id,
+          user: req.user._id,
+          role: "assistant",
+          content
+        }
+      ]);
+    } catch (saveErr) {
+      console.error("Failed to save coding chat history:", saveErr);
+    }
+
     res.json({ success: true, content });
   } catch (err) {
     next(err);

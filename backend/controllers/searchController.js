@@ -1,6 +1,8 @@
 const { recordUsage } = require("../services/usageService");
 const { webSearch } = require("../services/searchService");
 const aiService = require("../services/aiService");
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
 
 // POST /api/search  { query }
 exports.search = async (req, res, next) => {
@@ -33,6 +35,36 @@ exports.search = async (req, res, next) => {
     );
 
     await recordUsage(req.user._id, "web_search", { query });
+
+    // Save automatically to Chat History
+    try {
+      const chatTitle = `[Search] ${query}`.slice(0, 60);
+      const chat = await Chat.create({
+        user: req.user._id,
+        title: chatTitle,
+        mode: "chat"
+      });
+      await Message.create([
+        {
+          chat: chat._id,
+          user: req.user._id,
+          role: "user",
+          content: query,
+          isWebSearch: true
+        },
+        {
+          chat: chat._id,
+          user: req.user._id,
+          role: "assistant",
+          content: answer,
+          sources: results,
+          isWebSearch: true
+        }
+      ]);
+    } catch (saveErr) {
+      console.error("Failed to save search chat history:", saveErr);
+    }
+
     res.json({ success: true, answer, sources: results });
   } catch (err) {
     next(err);
