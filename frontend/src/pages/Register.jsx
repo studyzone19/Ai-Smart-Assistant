@@ -253,34 +253,34 @@ export default function Register() {
           </p>
 
           {/* ── PW Style App Download / Install Card ── */}
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 shadow-sm hover:border-violet-300 hover:shadow-md transition-all">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-white shrink-0 shadow-md shadow-violet-500/20">
-                  <Smartphone size={20} className="text-white" />
+          <div className="mt-6 pt-5 border-t border-slate-200">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-violet-300 transition-all">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-white shrink-0 shadow-md shadow-violet-500/20">
+                  <Smartphone size={18} className="text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-800 text-xs sm:text-sm truncate flex items-center gap-1.5">
-                    Install RamAI App
-                    <span className="text-[10px] font-bold text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded-full">Fast</span>
+                    RamAI Mobile App
+                    <span className="text-[9px] font-bold text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded-full">Free</span>
                   </p>
-                  <p className="text-[11px] text-slate-500 truncate">1-Click Android & iOS install</p>
+                  <p className="text-[11px] text-slate-500 truncate">Install on Android & iPhone</p>
                 </div>
               </div>
 
               {isInstalled ? (
-                <div className="flex items-center gap-1 text-emerald-600 text-xs font-semibold shrink-0 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
+                <div className="flex items-center justify-center gap-1 text-emerald-600 text-xs font-semibold w-full sm:w-auto bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
                   <CheckCircle2 size={15} /> Installed
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={handleInstallApp}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 !text-white text-xs font-semibold px-4 py-2.5 rounded-xl shrink-0 shadow-md shadow-violet-500/20 transition-all active:scale-95"
-                  style={{ color: "#ffffff" }}
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-700 hover:to-cyan-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shrink-0 shadow-md shadow-violet-500/25 transition-all active:scale-95 cursor-pointer"
+                  style={{ color: "#ffffff", background: "linear-gradient(to right, #7c3aed, #06b6d4)" }}
                 >
                   <Download size={14} className="text-white" />
-                  <span style={{ color: "#ffffff" }}>Install App</span>
+                  <span className="text-white font-bold" style={{ color: "#ffffff" }}>Download App</span>
                 </button>
               )}
             </div>
