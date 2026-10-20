@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, Loader2, Mail, Lock, User, Eye, EyeOff, ArrowRight, Bot, Zap, BookOpen, Code2 } from "lucide-react";
+import { Sparkles, Loader2, Mail, Lock, User, Eye, EyeOff, ArrowRight, Bot, Zap, BookOpen, Code2, Download, Smartphone, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const FEATURES = [
@@ -17,8 +17,46 @@ export default function Register() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) {
+      setIsInstalled(true);
+    }
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert("📲 To install this app on your phone:\n\n1. Tap the 3 dots (⋮) in Chrome or 'Share' in Safari\n2. Select 'Install app' or 'Add to Home screen'\n\nIt will install directly like an Android app!");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,7 +121,17 @@ export default function Register() {
           </div>
         </div>
 
-        <p className="text-slate-400 text-xs relative z-10">© 2026 AI Smart Assistant — Built by Ram Prajapati</p>
+        <div className="flex items-center justify-between relative z-10">
+          <p className="text-slate-400 text-xs">© 2026 AI Smart Assistant — Built by Ram Prajapati</p>
+          <button
+            type="button"
+            onClick={handleInstallApp}
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-violet-600 transition-colors"
+          >
+            <Smartphone size={14} />
+            <span>Install Web App</span>
+          </button>
+        </div>
       </div>
 
       {/* ── RIGHT PANEL ── */}
@@ -203,6 +251,39 @@ export default function Register() {
               Sign in
             </Link>
           </p>
+
+          {/* ── PW Style App Download / Install Card ── */}
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <div className="bg-gradient-to-br from-violet-500/10 via-cyan-500/10 to-transparent border border-violet-200/60 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm hover:border-violet-300 transition-all">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-white shrink-0 shadow-md shadow-violet-500/20">
+                  <Smartphone size={20} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-800 text-xs sm:text-sm truncate flex items-center gap-1.5">
+                    Install RamAI Mobile App
+                    <span className="text-[10px] font-bold text-violet-700 bg-violet-100 px-1.5 py-0.2 rounded-full">Fast</span>
+                  </p>
+                  <p className="text-[11px] text-slate-500 truncate">1-Click Android & iOS app install</p>
+                </div>
+              </div>
+
+              {isInstalled ? (
+                <div className="flex items-center gap-1 text-emerald-600 text-xs font-semibold shrink-0 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
+                  <CheckCircle2 size={15} /> Installed
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleInstallApp}
+                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl shrink-0 shadow-sm transition-all active:scale-95"
+                >
+                  <Download size={14} />
+                  <span>Download App</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
