@@ -8,7 +8,7 @@ const fs = require("fs");
 // GET /api/chats
 exports.listChats = async (req, res, next) => {
   try {
-    const chats = await Chat.find({ user: req.user._id }).sort({ isPinned: -1, updatedAt: -1 });
+    const chats = await Chat.find({ user: req.user._id, isDeletedByUser: { $ne: true } }).sort({ isPinned: -1, updatedAt: -1 });
     res.json({ success: true, chats });
   } catch (err) {
     next(err);
@@ -29,7 +29,7 @@ exports.createChat = async (req, res, next) => {
 // GET /api/chats/:id/messages
 exports.getMessages = async (req, res, next) => {
   try {
-    const chat = await Chat.findOne({ _id: req.params.id, user: req.user._id });
+    const chat = await Chat.findOne({ _id: req.params.id, user: req.user._id, isDeletedByUser: { $ne: true } });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
     const messages = await Message.find({ chat: chat._id }).sort({ createdAt: 1 });
     res.json({ success: true, chat, messages });
@@ -39,15 +39,15 @@ exports.getMessages = async (req, res, next) => {
 };
 
 // DELETE /api/chats/:id
+// Soft delete: User ke side se hide ho jayega, but database and Admin Dashboard me hamesha save rahega
 exports.deleteChat = async (req, res, next) => {
   try {
-    const chat = await Chat.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    const chat = await Chat.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: { isDeletedByUser: true, deletedAt: new Date() } },
+      { new: true }
+    );
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
-    const messages = await Message.find({ chat: chat._id }).select("+attachmentPath");
-    messages.forEach((message) => {
-      if (message.attachmentPath && fs.existsSync(message.attachmentPath)) fs.unlinkSync(message.attachmentPath);
-    });
-    await Message.deleteMany({ chat: chat._id });
     res.json({ success: true, message: "Chat deleted" });
   } catch (err) {
     next(err);

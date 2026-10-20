@@ -10,6 +10,8 @@ const chatSchema = new mongoose.Schema(
       default: "chat",
     },
     isPinned: { type: Boolean, default: false },
+    isDeletedByUser: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

@@ -198,7 +198,14 @@ function AdminChatViewer({ chat }) {
     <div className="bg-surface2/50 border border-white/5 rounded-xl p-4 flex flex-col group transition-colors">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div>
-          <h5 className="font-medium text-slate-200 group-hover:text-white transition-colors">{chat.title}</h5>
+          <div className="flex items-center gap-2">
+            <h5 className="font-medium text-slate-200 group-hover:text-white transition-colors">{chat.title}</h5>
+            {chat.isDeletedByUser && (
+              <span className="text-[10px] uppercase font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md">
+                Deleted by User
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-500">
             <span className="uppercase tracking-wider font-semibold">{chat.mode}</span>
             <span>•</span>
