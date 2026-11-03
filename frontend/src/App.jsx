@@ -54,11 +54,11 @@ export default function App() {
         <Route path="chat/:chatId" element={<Chat />} />
         <Route path="study" element={<Study />} />
         <Route path="code" element={<Code />} />
-        <Route path="documents" element={<Documents />} />
+        <Route path="documents" element={<Navigate to="/chat" replace />} />
         <Route path="search" element={<Search />} />
         <Route path="resume" element={<Resume />} />
         <Route path="reports" element={<Reports />} />
-        <Route path="memory" element={<Memory />} />
+        <Route path="memory" element={<Navigate to="/chat" replace />} />
         <Route path="settings" element={<Settings />} />
         <Route path="admin" element={<AdminOnly><Admin /></AdminOnly>}>
           <Route index element={<Navigate to="dashboard" replace />} />

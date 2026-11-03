@@ -9,12 +9,10 @@ import { useAuth } from "../context/AuthContext.jsx";
 import api from "../services/api.js";
 
 const toolItems = [
-  { to: "/study",     label: "Learn",    icon: GraduationCap },
-  { to: "/code",      label: "Code",     icon: Code2 },
-  { to: "/documents", label: "Analyze",  icon: FileText },
-  { to: "/resume",    label: "Resume",   icon: FileEdit },
-  { to: "/reports",   label: "Reports",  icon: ClipboardList },
-  { to: "/memory",    label: "Memory",   icon: Brain },
+  { to: "/study",   label: "Learn",   icon: GraduationCap },
+  { to: "/code",    label: "Code",    icon: Code2 },
+  { to: "/resume",  label: "Resume",  icon: FileEdit },
+  { to: "/reports", label: "Reports", icon: ClipboardList },
 ];
 
 export default function Layout() {
@@ -307,11 +305,11 @@ export default function Layout() {
             <Code2 size={19} />
             <span>Code</span>
           </NavLink>
-          <NavLink to="/documents" className={({ isActive }) =>
+          <NavLink to="/resume" className={({ isActive }) =>
             `flex flex-col items-center flex-1 py-1.5 text-[10px] gap-0.5 transition-colors
             ${isActive ? "text-white" : "text-slate-500 hover:text-slate-300"}`}>
-            <FileText size={19} />
-            <span>Analyze</span>
+            <FileEdit size={19} />
+            <span>Resume</span>
           </NavLink>
           <button
             onClick={() => setMobileMenuOpen(true)}
