@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         name: "RamAI Smart Assistant",
         short_name: "RamAI",
-        description: "Ask. Learn. Code. Create. Analyze.",
+        description: "Ask. Learn. Code. Create.",
         theme_color: "#f1f5f9",
         background_color: "#f8fafc",
         display: "standalone",
