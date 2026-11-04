@@ -61,8 +61,29 @@ async function chatCompletion(history, language = "english", modelName = null, i
   let extraSystem = "";
   let sources = [];
 
+  // Check for real-world entity photograph (monuments, landmarks, animals, people, objects) from Wikipedia
+  const lastUserMsg = history[history.length - 1]?.content || "";
+  let wikiContext = "";
+  try {
+    const { getWikipediaMedia } = require("./wikipediaService");
+    const wiki = await getWikipediaMedia(lastUserMsg);
+    if (wiki && wiki.image) {
+      wikiContext = `\n\n[AUTHENTIC REAL-WORLD KNOWLEDGE & PHOTOGRAPH (Source: Wikipedia)]:
+Entity: ${wiki.title}
+Real Photo URL: ${wiki.image}
+Summary: ${wiki.extract}
+
+CRITICAL INSTRUCTION: The user is asking about or requesting an image/overview of "${wiki.title}".
+Like Google Gemini, you MUST include this authentic Wikipedia photograph in your response on its own line using this EXACT markdown syntax:
+![${wiki.title}. Source: Wikipedia](${wiki.image})
+
+Accompany the photo with an informative, interesting, beautifully written overview (history, architecture, key facts) in a friendly tone just like Google Gemini. DO NOT generate an AI drawing when this verified real photograph is provided!`;
+    }
+  } catch (err) {
+    console.warn("Wiki media check skipped:", err.message);
+  }
+
   if (isWebSearch) {
-    const lastUserMsg = history[history.length - 1]?.content || "";
     const { webSearch } = require("./searchService");
     const searchResults = await webSearch(lastUserMsg, 4);
     if (searchResults.length) {
@@ -77,6 +98,8 @@ async function chatCompletion(history, language = "english", modelName = null, i
       throw error;
     }
   }
+
+  extraSystem += wikiContext;
 
   const reply = await complete(history, {
     system: `You are Ram AI, a helpful general-purpose AI. Be accurate, friendly, and easy to understand for a beginner by default. Start with a short direct answer, then explain unfamiliar ideas in plain language. Keep paragraphs short, use clear headings and a small practical example when it helps. Explain technical terms the first time they appear. When a process, system, comparison, or set of connected ideas would be easier to understand visually, include one small flowchart in a fenced mermaid block using simple syntax such as flowchart TD and A[Start] --> B[Next step]. Keep diagrams to 3–7 boxes and label them in plain language; do not include diagrams for simple fact answers. Avoid dense jargon, long formal proofs, advanced theorems, and unnecessary formulas unless the user asks for advanced or detailed treatment. Keep the answer focused on the question; do not turn a simple question into a textbook chapter. For technical topics, preserve important distinctions and do not present common shortcuts as exact definitions. Use markdown formatting (headings, lists, code blocks) where it improves readability.

@@ -69,7 +69,9 @@ function AIImage({ src, alt, userName }) {
   const [retryCount, setRetryCount] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Enforce Flux 1024x1024 HD parameters on any image URL
+  const isWiki = (src || "").includes("wikimedia.org") || (alt || "").includes("Wikipedia");
+
+  // Enforce Flux 1024x1024 HD parameters on Pollinations image URLs
   const buildSrc = (rawSrc, retry) => {
     if (!rawSrc) return rawSrc;
     try {
@@ -106,7 +108,7 @@ function AIImage({ src, alt, userName }) {
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      const cleanName = (alt || "ai-image").toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 30);
+      const cleanName = (alt || "image").toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 30);
       a.download = `${cleanName}-${Date.now()}.jpg`;
       document.body.appendChild(a);
       a.click();
@@ -118,7 +120,7 @@ function AIImage({ src, alt, userName }) {
   };
 
   return (
-    <div className="relative my-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 max-w-full bg-[#111827] group/img">
+    <div className="relative my-5 mx-auto max-w-lg sm:max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-[#0f172a] group/img">
       {/* Loading skeleton */}
       {status === "loading" && (
         <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-slate-400">
@@ -126,8 +128,12 @@ function AIImage({ src, alt, userName }) {
             <ImageIcon size={28} className="text-teal-400 opacity-60 animate-pulse" />
           </div>
           <div className="text-center space-y-1">
-            <p className="text-xs font-semibold text-slate-200 animate-pulse">Rendering 8K Flux Image…</p>
-            <p className="text-[11px] text-slate-500">Creating high-definition details & lighting</p>
+            <p className="text-xs font-semibold text-slate-200 animate-pulse">
+              {isWiki ? "Loading Wikipedia Photograph…" : "Rendering 8K Flux Image…"}
+            </p>
+            <p className="text-[11px] text-slate-500">
+              {isWiki ? "Fetching authentic high-resolution archive photo" : "Creating high-definition details & lighting"}
+            </p>
           </div>
           <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden mt-1">
             <div className="h-full w-full bg-gradient-to-r from-purple-500 via-pink-500 to-teal-400 rounded-full animate-[pulse_1.5s_ease-in-out_infinite]" />
@@ -139,7 +145,7 @@ function AIImage({ src, alt, userName }) {
       {status === "error" && (
         <div className="flex flex-col items-center justify-center gap-3 py-14 px-6 text-slate-400">
           <ImageIcon size={36} className="opacity-20" />
-          <p className="text-xs text-slate-400 text-center">Image generation took longer than usual.<br />Click Retry to try again.</p>
+          <p className="text-xs text-slate-400 text-center">Could not load image.<br />Click Retry to try again.</p>
           <button
             onClick={handleRetry}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs text-white transition-colors"
@@ -155,27 +161,25 @@ function AIImage({ src, alt, userName }) {
         className={`relative cursor-pointer select-none ${status === "loaded" ? "block" : "hidden"}`}
         title="Click to view full HD resolution"
       >
-        <img
-          key={`${finalSrc}-${retryCount}`}
-          src={finalSrc}
-          alt={alt || "AI Generated Image"}
-          loading="eager"
-          style={{ imageRendering: "auto" }}
-          onLoad={() => setStatus("loaded")}
-          onError={() => setStatus("error")}
-          className="block w-full max-h-[600px] object-contain transition-all duration-300 group-hover/img:scale-[1.005]"
-        />
-
-        {/* Top Floating Badge */}
-        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-emerald-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-xl border border-emerald-500/30 flex items-center gap-1 shadow-lg">
-          <Sparkles size={11} className="text-emerald-400" />
-          <span>Flux Ultra HD</span>
+        <div className="overflow-hidden bg-slate-950 flex items-center justify-center max-h-[460px]">
+          <img
+            key={`${finalSrc}-${retryCount}`}
+            src={finalSrc}
+            alt={alt || "Image"}
+            loading="eager"
+            style={{ imageRendering: "auto" }}
+            onLoad={() => setStatus("loaded")}
+            onError={() => setStatus("error")}
+            className="block w-full max-h-[460px] object-cover sm:object-contain transition-all duration-300 group-hover/img:scale-[1.01]"
+          />
         </div>
 
-        {/* User watermark */}
-        <div className="absolute bottom-3 left-3 bg-black/75 text-white text-[11px] px-3 py-1 rounded-xl font-medium tracking-wide backdrop-blur-md border border-white/10 shadow-lg flex items-center gap-1.5 select-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-          <span>Created for {userName}</span>
+        {/* Top Floating Badge */}
+        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-xl border border-white/15 flex items-center gap-1 shadow-lg">
+          <Sparkles size={11} className={isWiki ? "text-cyan-400" : "text-emerald-400"} />
+          <span className={isWiki ? "text-cyan-200" : "text-emerald-300"}>
+            {isWiki ? "Wikipedia Verified" : "Flux Ultra HD"}
+          </span>
         </div>
 
         {/* Top-Right Action Buttons */}
@@ -196,6 +200,13 @@ function AIImage({ src, alt, userName }) {
             <span>HD Download</span>
           </button>
         </div>
+
+        {/* Bottom Caption — exact Google Gemini style */}
+        {alt && (
+          <div className="text-center py-2.5 px-4 text-xs text-slate-300 italic bg-slate-900/90 border-t border-white/10">
+            {alt}
+          </div>
+        )}
       </div>
 
       {/* Fullscreen Lightbox Modal */}
@@ -224,12 +235,12 @@ function AIImage({ src, alt, userName }) {
           <div className="max-w-5xl max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             <img
               src={finalSrc}
-              alt={alt || "AI Generated Image"}
-              className="max-h-[84vh] w-auto object-contain rounded-2xl shadow-2xl border border-white/15"
+              alt={alt || "Image"}
+              className="max-h-[82vh] w-auto object-contain rounded-2xl shadow-2xl border border-white/15"
             />
             {alt && (
               <p className="mt-3 text-xs text-slate-300 text-center max-w-2xl px-4 truncate font-medium">
-                "{alt}"
+                {alt}
               </p>
             )}
           </div>
