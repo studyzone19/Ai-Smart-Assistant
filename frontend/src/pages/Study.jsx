@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GraduationCap, Loader2, Sparkles, BookOpen, Settings2 } from "lucide-react";
+import { GraduationCap, Loader2, Sparkles, BookOpen, Settings2, Download, Copy, Check } from "lucide-react";
 import api from "../services/api";
 import MarkdownView from "../components/MarkdownView.jsx";
 
@@ -24,6 +24,13 @@ export default function Study() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeMobileTab, setActiveMobileTab] = useState("setup"); // "setup" | "output"
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(result);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -207,16 +214,27 @@ export default function Study() {
 
           {result && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
                 <h3 className="font-semibold text-sm sm:text-base text-white truncate">
                   {form.topic} ({form.subject})
                 </h3>
-                <button
-                  onClick={() => navigator.clipboard.writeText(result)}
-                  className="text-xs text-accent hover:underline shrink-0"
-                >
-                  Copy All
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-200 transition-colors"
+                  >
+                    {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    <span>{copied ? "Copied" : "Copy"}</span>
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-xs text-teal-200 border border-teal-500/30 transition-colors"
+                    title="Print or Save as PDF"
+                  >
+                    <Download size={14} />
+                    <span>Save PDF</span>
+                  </button>
+                </div>
               </div>
               <MarkdownView content={result} />
             </div>

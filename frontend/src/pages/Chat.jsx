@@ -316,6 +316,23 @@ ${content || "Explain this file in notes."}` : content }]);
     }));
   };
 
+  const handleExportMarkdown = () => {
+    if (!messages || messages.length === 0) return;
+    const current = chats.find((c) => c._id === chatId);
+    const title = current?.title || 'Conversation';
+    const content = '# ' + title + '\n*Exported from RamAI on ' + new Date().toLocaleDateString() + '*\n\n---\n\n' +
+      messages.map((m) => '### ' + (m.role === 'user' ? '👤 You' : '🤖 RamAI') + '\n\n' + m.content + '\n\n').join('---\n\n');
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now() + '.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleShare = () => {
     const text = messages.map((m) => `${m.role === "user" ? "You" : "AI"}: ${m.content}`).join("\n\n");
     navigator.clipboard.writeText(text);
@@ -471,7 +488,19 @@ ${content || "Explain this file in notes."}` : content }]);
               <Volume2 size={15} />
             </button>
 
-            {/* Download PDF / Print Button */}
+                        {/* Export Markdown */}
+            {messages.length > 0 && (
+              <button
+                onClick={handleExportMarkdown}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium border border-white/10 transition-colors"
+                title="Export as Markdown document"
+              >
+                <Download size={13} className="text-blue-400" />
+                <span>Export .MD</span>
+              </button>
+            )}
+
+{/* Download PDF / Print Button */}
             {messages.length > 0 && (
               <button
                 onClick={() => window.print()}

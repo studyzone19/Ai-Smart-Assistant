@@ -6,6 +6,7 @@ import Register from "./pages/Register.jsx";
 import Chat from "./pages/Chat.jsx";
 import Study from "./pages/Study.jsx";
 import Code from "./pages/Code.jsx";
+import Images from "./pages/Images.jsx";
 import Search from "./pages/Search.jsx";
 import Resume from "./pages/Resume.jsx";
 import Reports from "./pages/Reports.jsx";
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="chat/:chatId" element={<Chat />} />
         <Route path="study" element={<Study />} />
         <Route path="code" element={<Code />} />
+        <Route path="images" element={<Images />} />
         <Route path="documents" element={<Navigate to="/chat" replace />} />
         <Route path="search" element={<Search />} />
         <Route path="resume" element={<Resume />} />

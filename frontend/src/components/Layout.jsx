@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
-  MessageSquare, GraduationCap, Code2, FileText,
-  FileEdit, ClipboardList, Brain, Settings, ShieldCheck, LogOut,
+  MessageSquare, GraduationCap, Code2, Image as ImageIcon,
+  FileEdit, ClipboardList, Settings, ShieldCheck, LogOut,
   Menu, X, SquarePen, Trash2, Plus
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -11,6 +11,7 @@ import api from "../services/api.js";
 const toolItems = [
   { to: "/study",   label: "Learn",   icon: GraduationCap },
   { to: "/code",    label: "Code",    icon: Code2 },
+  { to: "/images",  label: "Images",  icon: ImageIcon },
   { to: "/resume",  label: "Resume",  icon: FileEdit },
   { to: "/reports", label: "Reports", icon: ClipboardList },
 ];
