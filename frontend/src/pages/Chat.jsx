@@ -4,7 +4,7 @@ import {
   Send, Mic, Plus, Trash2, RefreshCw, Copy, Volume2, Pause, Square,
   MessageSquare, Pin, Loader2, History, X, Check,
   Pencil, ThumbsUp, ThumbsDown, Share2, MoreHorizontal, Edit3,
-  ArrowDown, PanelLeft, SquarePen, Globe, Download, BookOpen, Code2, Lightbulb, PenLine, Paperclip
+  ArrowDown, PanelLeft, SquarePen, Globe, Download, BookOpen, Code2, Lightbulb, PenLine, Paperclip, Sparkles
 } from "lucide-react";
 import api from "../services/api";
 import MarkdownView from "../components/MarkdownView.jsx";

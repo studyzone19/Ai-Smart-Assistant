@@ -3,7 +3,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Download, ImageIcon, RefreshCw } from "lucide-react";
+import { Download, ImageIcon, RefreshCw, Maximize2, ZoomIn, X, Sparkles } from "lucide-react";
 import { isValidElement, useState } from "react";
 
 const FLOW_EDGE = /(\w+)(?:\[(.*?)\]|\((.*?)\)|\{(.*?)\})?\s*--?>\s*(?:\|([^|]+)\|\s*)?(\w+)(?:\[(.*?)\]|\((.*?)\)|\{(.*?)\})?/g;
@@ -67,14 +67,20 @@ function FlowDiagram({ source }) {
 function AIImage({ src, alt, userName }) {
   const [status, setStatus] = useState("loading"); // loading | loaded | error
   const [retryCount, setRetryCount] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  // Keep the original URL completely intact - just add nologo if missing
+  // Enforce Flux 1024x1024 HD parameters on any image URL
   const buildSrc = (rawSrc, retry) => {
     if (!rawSrc) return rawSrc;
     try {
       const url = new URL(rawSrc);
-      url.searchParams.set("nologo", "true");
-      // Add a unique seed on retry so a fresh image is fetched
+      if (url.hostname.includes("pollinations.ai")) {
+        url.searchParams.set("model", "flux");
+        url.searchParams.set("width", "1024");
+        url.searchParams.set("height", "1024");
+        url.searchParams.set("enhance", "true");
+        url.searchParams.set("nologo", "true");
+      }
       if (retry > 0) {
         url.searchParams.set("seed", String(Math.floor(Math.random() * 99999)));
       }
@@ -91,15 +97,40 @@ function AIImage({ src, alt, userName }) {
     setRetryCount((c) => c + 1);
   };
 
+  const handleDownload = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const res = await fetch(finalSrc);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      const cleanName = (alt || "ai-image").toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 30);
+      a.download = `${cleanName}-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(finalSrc, "_blank");
+    }
+  };
+
   return (
-    <div className="relative my-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 max-w-full bg-[#1a1a1a] group/img">
+    <div className="relative my-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 max-w-full bg-[#111827] group/img">
       {/* Loading skeleton */}
       {status === "loading" && (
         <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-slate-400">
-          <ImageIcon size={36} className="opacity-40 animate-pulse" />
-          <p className="text-xs animate-pulse">Generating image…</p>
-          <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full w-full bg-gradient-to-r from-violet-500 to-cyan-400 rounded-full animate-[pulse_1.5s_ease-in-out_infinite]" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500/20 to-teal-500/20 flex items-center justify-center border border-white/10">
+            <ImageIcon size={28} className="text-teal-400 opacity-60 animate-pulse" />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-xs font-semibold text-slate-200 animate-pulse">Rendering 8K Flux Image…</p>
+            <p className="text-[11px] text-slate-500">Creating high-definition details & lighting</p>
+          </div>
+          <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden mt-1">
+            <div className="h-full w-full bg-gradient-to-r from-purple-500 via-pink-500 to-teal-400 rounded-full animate-[pulse_1.5s_ease-in-out_infinite]" />
           </div>
         </div>
       )}
@@ -108,48 +139,101 @@ function AIImage({ src, alt, userName }) {
       {status === "error" && (
         <div className="flex flex-col items-center justify-center gap-3 py-14 px-6 text-slate-400">
           <ImageIcon size={36} className="opacity-20" />
-          <p className="text-xs text-slate-500 text-center">Image generation timed out.<br />Click Retry to try again.</p>
+          <p className="text-xs text-slate-400 text-center">Image generation took longer than usual.<br />Click Retry to try again.</p>
           <button
             onClick={handleRetry}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-slate-300 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs text-white transition-colors"
           >
-            <RefreshCw size={12} /> Retry
+            <RefreshCw size={12} /> Retry Image
           </button>
         </div>
       )}
 
-      {/* Actual image — always rendered, hidden during load/error */}
-      <img
-        key={`${finalSrc}-${retryCount}`}
-        src={finalSrc}
-        alt={alt || "AI Generated Image"}
-        loading="eager"
-        onLoad={() => setStatus("loaded")}
-        onError={() => setStatus("error")}
-        className={`block w-full max-h-[600px] object-contain transition-all duration-500 ${
-          status === "loaded" ? "opacity-100" : "opacity-0 h-0 pointer-events-none"
-        }`}
-      />
+      {/* Actual image — click to zoom in Lightbox */}
+      <div
+        onClick={() => status === "loaded" && setLightboxOpen(true)}
+        className={`relative cursor-pointer select-none ${status === "loaded" ? "block" : "hidden"}`}
+        title="Click to view full HD resolution"
+      >
+        <img
+          key={`${finalSrc}-${retryCount}`}
+          src={finalSrc}
+          alt={alt || "AI Generated Image"}
+          loading="eager"
+          style={{ imageRendering: "auto" }}
+          onLoad={() => setStatus("loaded")}
+          onError={() => setStatus("error")}
+          className="block w-full max-h-[600px] object-contain transition-all duration-300 group-hover/img:scale-[1.005]"
+        />
 
-      {/* User watermark */}
-      {status === "loaded" && (
+        {/* Top Floating Badge */}
+        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-emerald-300 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-xl border border-emerald-500/30 flex items-center gap-1 shadow-lg">
+          <Sparkles size={11} className="text-emerald-400" />
+          <span>Flux Ultra HD</span>
+        </div>
+
+        {/* User watermark */}
         <div className="absolute bottom-3 left-3 bg-black/75 text-white text-[11px] px-3 py-1 rounded-xl font-medium tracking-wide backdrop-blur-md border border-white/10 shadow-lg flex items-center gap-1.5 select-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
           <span>Created for {userName}</span>
         </div>
-      )}
 
-      {/* Download button */}
-      {status === "loaded" && (
-        <a
-          href={finalSrc}
-          target="_blank"
-          rel="noreferrer"
-          className="absolute top-3 right-3 bg-black/75 hover:bg-black text-white p-2 rounded-xl backdrop-blur-md border border-white/10 shadow-lg opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center gap-1 text-xs"
-          title="Open / Download HD Image"
+        {/* Top-Right Action Buttons */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover/img:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => { e.stopPropagation(); setLightboxOpen(true); }}
+            className="bg-black/75 hover:bg-black text-white p-2 rounded-xl backdrop-blur-md border border-white/10 shadow-lg text-xs flex items-center gap-1 transition-all"
+            title="Zoom Fullscreen"
+          >
+            <Maximize2 size={13} />
+          </button>
+          <button
+            onClick={handleDownload}
+            className="bg-gradient-to-r from-purple-600 to-teal-500 hover:opacity-95 text-white px-3 py-1.5 rounded-xl backdrop-blur-md shadow-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+            title="Download HD Image"
+          >
+            <Download size={13} />
+            <span>HD Download</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Fullscreen Lightbox Modal */}
+      {lightboxOpen && (
+        <div
+          onClick={() => setLightboxOpen(false)}
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 select-none cursor-zoom-out"
         >
-          <Download size={13} /> HD
-        </a>
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleDownload}
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+              title="Download HD Image"
+            >
+              <Download size={18} />
+            </button>
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+              title="Close Fullscreen"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="max-w-5xl max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={finalSrc}
+              alt={alt || "AI Generated Image"}
+              className="max-h-[84vh] w-auto object-contain rounded-2xl shadow-2xl border border-white/15"
+            />
+            {alt && (
+              <p className="mt-3 text-xs text-slate-300 text-center max-w-2xl px-4 truncate font-medium">
+                "{alt}"
+              </p>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
