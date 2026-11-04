@@ -7,7 +7,12 @@ exports.generateImage = async (req, res, next) => {
     if (!prompt) return res.status(400).json({ success: false, message: "Describe the image you want to create." });
     if (prompt.length > 1500) return res.status(400).json({ success: false, message: "Image description must be 1500 characters or fewer." });
 
-    const image = await generateImage(prompt, req.body.aspectRatio);
+    const image = await generateImage(
+      prompt,
+      req.body.aspectRatio,
+      req.body.style,
+      req.body.enhance !== false
+    );
     await recordUsage(req.user._id, "image_generation");
     res.json({ success: true, image });
   } catch (err) {
